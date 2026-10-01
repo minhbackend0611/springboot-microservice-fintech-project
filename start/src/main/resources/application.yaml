@@ -1,0 +1,108 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/banking_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: auth
+
+  cloud:
+    aws:
+      region:
+        static: ${AWS_REGION:ap-southeast-1}
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID:your_aws_access_key}
+        secret-key: ${AWS_SECRET_ACCESS_KEY:your_aws_secret_key}
+      sns:
+        auto-create-topics: false
+
+  flyway:
+    enabled: false
+
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:your_email@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:your_app_password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    user:
+      name: ${SPRING_SECURITY_USER_NAME:user}
+      password: ${SPRING_SECURITY_USER_PASSWORD:password}
+
+  data:
+    redis:
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        acks: all
+        retries: 3
+        retry.backoff.ms: 100
+    consumer:
+      group-id: banking-auth-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "minh.project.*"
+        max.poll.interval.ms: 300000
+    properties:
+      heartbeat.interval.ms: 3000
+      session.timeout.ms: 45000
+
+logging:
+  level:
+    root: INFO
+    org.flywaydb: INFO
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+    minh.project: DEBUG
+
+server:
+  port: ${SERVER_PORT:8090}
+  servlet:
+    context-path: "/api"
+
+app:
+  name: PayPay
+  jwt:
+    secret:
+      access: ${APP_JWT_SECRET_ACCESS:WW91ckFjY2Vzc1Rva2VuU2VjcmV0S2V5Rm9yRGV2ZWxvcG1lbnRPbmx5MTIzNDU2Nzg5MDEyMzQ1Njc4OTA=}
+      refresh: ${APP_JWT_SECRET_REFRESH:WW91clJlZnJlc2hUb2tlblNlY3JldEtleUZvckRldmVsb3BtZW50T25seTEyMzQ1Njc4OTAxMjM0NTY3ODkw=}
+    duration:
+      access: 1h
+      refresh: 7d
+  security:
+    login:
+      lock_duration_times: 15m
+      max_attempts: 5
+      max_cycle_attempts: 3
+    register:
+      otp:
+        length: 6
+        ttl: 2m
+        context:
+          create-account: 5m
+          forgot-password: 5m
